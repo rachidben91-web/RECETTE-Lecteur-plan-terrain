@@ -20,8 +20,8 @@ export const PdfService = {
         const buffer = await file.arrayBuffer();
         const typed = new Uint8Array(buffer);
         
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
         
         State.pdfDoc = await pdfjsLib.getDocument(typed).promise;
         State.pageCount = State.pdfDoc.numPages;
