@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#f0f1f3"/>
+  <circle cx="256" cy="256" r="220" fill="white" fill-opacity="0.60" stroke="#c8c8c8" stroke-width="6"/>
+  <path d="M140 256 L372 256" stroke="#0078d4" stroke-width="30" stroke-linecap="round"/>
+  <path d="M140 256 L190 215" stroke="#0078d4" stroke-width="22" stroke-linecap="round"/>
+  <path d="M140 256 L190 297" stroke="#0078d4" stroke-width="22" stroke-linecap="round"/>
+  <text x="256" y="320" font-size="110" font-family="Segoe UI" font-weight="700"
+        fill="#0078d4" text-anchor="middle">MT</text>
+</svg>
