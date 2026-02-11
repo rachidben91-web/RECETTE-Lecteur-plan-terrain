@@ -8,39 +8,33 @@ const CACHE_NAME = `mesures-terrain-${APP_VERSION}`;
 
 // Fichiers essentiels (offline)
 const CORE_ASSETS = [
-    "/",
-    "/index.html",
-    "/css/main.css",
+  "./",
+  "./index.html",
+  "./css/main.css",
 
-    // JS – UI
-    "/js/ui/ui.js",
-    "/js/ui/modal.js",
+  "./js/ui/ui.js",
+  "./js/ui/modal.js",
 
-    // JS – Core
-    "/js/core/state.js",
-    "/js/core/config.js",
-    "/js/core/utils.js",
-    "/js/core/events.js",
+  "./js/core/state.js",
+  "./js/core/config.js",
+  "./js/core/utils.js",
+  "./js/core/events.js",
 
-    // JS – Renderer
-    "/js/renderer/canvas.js",
+  "./js/renderer/canvas.js",
 
-    // JS – Services
-    "/js/services/pdf.service.js",
-    "/js/services/export.service.js",
+  "./js/services/pdf.service.js",
+  "./js/services/export.service.js",
 
-    // JS Features
-    "/js/features/measure.js",
-    "/js/features/scale.js",
-    "/js/features/annotation.js",
-    "/js/features/text.js",
+  "./js/features/measure.js",
+  "./js/features/scale.js",
+  "./js/features/annotation.js",
+  "./js/features/text.js",
 
-    "/js/app.js",
+  "./js/app.js",
 
-    // Libraries externes
-    "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+  "https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
 ];
 
 // ------------------------------------------------------
