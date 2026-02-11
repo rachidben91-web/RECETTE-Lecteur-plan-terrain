@@ -1,1 +1,0 @@
-# RECETTE-Lecteur-plan-terrain
