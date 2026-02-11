@@ -1,129 +1,101 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <title>Mesures Terrain v4</title>
+  <meta charset="UTF-8" />
+  <title>Mesures Terrain v4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Thème clair B3 -->
+  <link rel="stylesheet" href="./css/main.css" />
 
-    <!-- Thème clair B3 (gris + verre mat) -->
-    <link rel="stylesheet" href="css/main.css">
+  <!-- Fabric.js (global 'fabric') -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" defer></script>
 
-    <!-- Fabric.js (Canvas Engine) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <!-- PDF.js (global 'pdfjsLib') -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 
-    <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- jsPDF (global window.jspdf) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
-    <!-- jsPDF pour export PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <!-- Icônes FontAwesome -->
-    <script src="https://kit.fontawesome.com/a2e0e9b5c0.js" crossorigin="anonymous"></script>
-
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
+  <!-- Manifest (PWA) -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#f0f1f3" />
 </head>
 
 <body>
+  <!-- Toolbar -->
+  <header class="toolbar glass" style="display:flex;align-items:center;padding:8px 15px;gap:10px;">
+    <input type="file" id="fileInput" accept=".pdf" style="display:none" />
+    <button id="btnOpen" class="glass" onclick="document.getElementById('fileInput').click()">
+      <span>Ouvrir</span>
+    </button>
 
-    <!-- ---------------------- -->
-    <!--  TOP TOOLBAR (verre mat) -->
-    <!-- ---------------------- -->
-    <header class="toolbar glass" style="display:flex; align-items:center; padding:8px 15px; gap:15px;">
-        <input type="file" id="fileInput" accept=".pdf" style="display:none">
+    <button id="btnPan" class="glass" title="Déplacer">PAN</button>
+    <button id="btnScale" class="glass" title="Étalonner">SCALE</button>
+    <button id="btnMeasure" class="glass" title="Mesurer">MESURE</button>
+    <button id="btnAnnotation" class="glass" title="Cotation">COTE</button>
+    <button id="btnText" class="glass" title="Texte">TEXTE</button>
 
-        <button id="btnOpen" class="glass" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-solid fa-folder-open"></i> Ouvrir
-        </button>
+    <button id="btnUndo" class="glass" title="Annuler">↶</button>
+    <button id="btnDelete" class="glass" title="Supprimer">🗑</button>
 
-        <button id="btnPan" class="glass"><i class="fa-solid fa-hand"></i></button>
-        <button id="btnScale" class="glass"><i class="fa-solid fa-ruler"></i></button>
-        <button id="btnMeasure" class="glass"><i class="fa-solid fa-pen-ruler"></i></button>
-        <button id="btnAnnotation" class="glass"><i class="fa-solid fa-vector-square"></i></button>
-        <button id="btnText" class="glass"><i class="fa-solid fa-font"></i></button>
+    <button id="btnSave" class="glass" title="Exporter PNG">PNG</button>
+    <button id="btnSavePDF" class="glass" title="Exporter PDF">PDF</button>
 
-        <button id="btnUndo" class="glass"><i class="fa-solid fa-rotate-left"></i></button>
-        <button id="btnDelete" class="glass"><i class="fa-solid fa-trash"></i></button>
+    <button id="btnFullscreen" class="glass" title="Plein écran">⛶</button>
 
-        <button id="btnSave" class="glass"><i class="fa-solid fa-download"></i> PNG</button>
-        <button id="btnSavePDF" class="glass"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-
-        <button id="btnFullscreen" class="glass"><i class="fa-solid fa-expand"></i></button>
-
-        <!-- Badge échelle -->
-        <div id="scaleBadge" class="glass"
-             style="margin-left:auto; padding:6px 12px; cursor:pointer;">
-            <b>Échelle :</b> <span id="scaleMini">—</span>
-        </div>
-    </header>
-
-
-    <!-- ---------------------- -->
-    <!--  STATUS BUBBLE -->
-    <!-- ---------------------- -->
-    <div id="statusBubble" class="glass"
-         style="
-            position:fixed; top:80px; left:50%; transform:translateX(-50%);
-            padding:10px 20px; border-radius:20px; display:none;">
-        Status
+    <div id="scaleBadge" class="glass" style="margin-left:auto;padding:6px 12px;cursor:pointer;">
+      <b>Échelle :</b> <span id="scaleMini">—</span>
     </div>
+  </header>
 
+  <!-- Status -->
+  <div id="statusBubble" class="glass" style="
+    position:fixed; top:80px; left:50%; transform:translateX(-50%);
+    padding:10px 20px; border-radius:20px; display:none;">Status</div>
 
-    <!-- ---------------------- -->
-    <!--  PALETTE COULEURS -->
-    <!-- ---------------------- -->
-    <div id="colorPicker" 
-         style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-         display:flex; gap:15px;">
-        <div class="color-dot selected" data-color="#ff5252" style="background:#ff5252"></div>
-        <div class="color-dot" data-color="#ffab00" style="background:#ffab00"></div>
-        <div class="color-dot" data-color="#00b0ff" style="background:#00b0ff"></div>
-        <div class="color-dot" data-color="#00e676" style="background:#00e676"></div>
-        <div class="color-dot" data-color="#e040fb" style="background:#e040fb"></div>
+  <!-- Palette -->
+  <div id="colorPicker" style="
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    display:flex; gap:12px;">
+    <button class="color-dot selected" data-color="#ff5252" style="width:28px;height:28px;border-radius:50%;background:#ff5252;border:none;"></button>
+    <button class="color-dot" data-color="#ffab00" style="width:28px;height:28px;border-radius:50%;background:#ffab00;border:none;"></button>
+    <button class="color-dot" data-color="#00b0ff" style="width:28px;height:28px;border-radius:50%;background:#00b0ff;border:none;"></button>
+    <button class="color-dot" data-color="#00e676" style="width:28px;height:28px;border-radius:50%;background:#00e676;border:none;"></button>
+    <button class="color-dot" data-color="#e040fb" style="width:28px;height:28px;border-radius:50%;background:#e040fb;border:none;"></button>
+  </div>
+
+  <!-- Canvas wrapper -->
+  <div id="canvasWrapper" style="position:fixed;top:60px;left:0;right:0;bottom:0;overflow:hidden;background:#f0f1f3;">
+    <canvas id="mainCanvas"></canvas>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalOverlay" style="
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px); align-items:center; justify-content:center;">
+    <div id="modalDialog" class="glass" style="min-width:320px;padding:20px;border-radius:12px;">
+      <h2 id="modalTitle">Titre</h2>
+      <label id="modalLabel" for="modalInput">Label</label>
+      <input id="modalInput" class="glass" type="text" style="width:100%;padding:10px;margin-top:6px;" />
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+        <button id="modalCancel" class="glass">Annuler</button>
+        <button id="modalConfirm" class="glass">Valider</button>
+      </div>
     </div>
+  </div>
 
+  <!-- App (ES Modules) -->
+  <script type="module" src="./js/app.js"></script>
 
-    <!-- ---------------------- -->
-    <!--  WRAPPER CANVAS -->
-    <!-- ---------------------- -->
-    <div id="canvasWrapper" style="
-        position:fixed; top:60px; left:0; right:0; bottom:0;
-        overflow:hidden; background:#f0f1f3;">
-        <canvas id="mainCanvas"></canvas>
-    </div>
-
-
-    <!-- ---------------------- -->
-    <!--  MODAL (Glass-matte) -->
-    <!-- ---------------------- -->
-    <div id="modalOverlay" style="
-        display:none; position:fixed; inset:0; 
-        background:rgba(0,0,0,0.4);
-        backdrop-filter: blur(4px);
-        align-items:center; justify-content:center;">
-        
-        <div id="modalDialog" class="glass" style="
-            min-width:300px; padding:20px; border-radius:12px;">
-
-            <h2 id="modalTitle">Titre</h2>
-            <label id="modalLabel" for="modalInput">Label</label>
-
-            <input id="modalInput" class="glass" type="text" 
-                   style="width:100%; padding:10px; margin-top:5px;">
-
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-                <button id="modalCancel" class="glass">Annuler</button>
-                <button id="modalConfirm" class="glass">Valider</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ---------------------- -->
-    <!--  SCRIPTS V4 (import ES modules) -->
-    <!-- ---------------------- -->
-    <script type="module" src="js/app.js"></script>
-
+  <!-- SW registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swPath = './sw.js'; // chemin relatif pour GH Pages
+        navigator.serviceWorker.register(swPath).catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
