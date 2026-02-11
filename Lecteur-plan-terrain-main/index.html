@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0e17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <title>Mesures Terrain - GRDF BDSN</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- App Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <!-- ===== TOP BAR ===== -->
+  <header class="top-bar">
+    <!-- Brand -->
+    <div class="brand glass-card glass-card--elevated">
+      <div class="brand__logo">
+        <img src="assets/grdf-logo.png" alt="GRDF BDSN" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-ruler-combined\' style=\'font-size:1.5rem;color:var(--accent)\'></i>'">
+      </div>
+      <div class="brand__text">
+        <div class="brand__title">Mesures Terrain</div>
+        <div class="brand__version" id="brandVersion">v3.3.0</div>
+      </div>
+    </div>
+    
+    <!-- Pager -->
+    <nav class="pager glass-card glass-card--elevated" aria-label="Navigation des pages">
+      <button id="btnPrevPage" class="btn btn--icon" disabled aria-label="Page précédente">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      
+      <span class="pager__label" id="pageLabel">Page — / —</span>
+      
+      <button id="btnNextPage" class="btn btn--icon" disabled aria-label="Page suivante">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      
+      <input 
+        type="number" 
+        id="pageJump" 
+        class="pager__input" 
+        min="1" 
+        step="1" 
+        placeholder="N°" 
+        disabled
+        aria-label="Aller à la page"
+      >
+      
+      <button id="btnGoPage" class="btn btn--icon" disabled aria-label="Aller à la page">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </nav>
+    
+    <!-- Actions -->
+    <div class="top-actions">
+      <label for="fileInput" class="btn glass-card--elevated" tabindex="0">
+        <i class="fa-solid fa-folder-open"></i>
+        <span>Ouvrir</span>
+      </label>
+      <input type="file" id="fileInput" accept=".pdf" class="sr-only">
+      
+      <button id="btnFullscreen" class="btn btn--icon glass-card--elevated" aria-label="Plein écran">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+      
+      <button id="btnSave" class="btn glass-card--elevated" disabled aria-label="Exporter en PNG">
+        <i class="fa-solid fa-download"></i>
+        <span>PNG</span>
+      </button>
+      
+      <button id="btnSavePDF" class="btn glass-card--elevated" disabled aria-label="Exporter en PDF">
+        <i class="fa-solid fa-file-pdf"></i>
+        <span>PDF</span>
+      </button>
+      
+      <button id="btnClear" class="btn btn--danger glass-card--elevated" aria-label="Tout effacer">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+  </header>
+  
+  <!-- ===== STATUS BUBBLE ===== -->
+  <div id="statusBubble" class="status-bubble" role="status" aria-live="polite">
+    Bienvenue
+  </div>
+  
+  <!-- ===== SCALE BADGE ===== -->
+  <aside id="scaleBadge" class="scale-badge glass-card">
+    <div class="scale-badge__header">
+      <span class="scale-badge__title">Échelle</span>
+      <span class="scale-badge__mini" id="scaleMini">—</span>
+    </div>
+    <div class="scale-badge__value">
+      <div class="scale-badge__indicator"></div>
+      <span class="scale-badge__text" id="scaleValue">Non détectée</span>
+    </div>
+  </aside>
+  
+  <!-- ===== COLOR PALETTE ===== -->
+  <div id="colorPicker" class="color-palette glass-card" role="radiogroup" aria-label="Couleur du tracé">
+    <button 
+      class="color-dot color-dot--selected" 
+      style="background: var(--color-elec);" 
+      data-color="#ff5252" 
+      title="Électricité (Rouge)"
+      role="radio"
+      aria-checked="true"
+    ></button>
+    <button 
+      class="color-dot" 
+      style="background: var(--color-gaz);" 
+      data-color="#ffab00" 
+      title="Gaz (Jaune)"
+      role="radio"
+      aria-checked="false"
+    ></button>
+    <button 
+      class="color-dot" 
+      style="background: var(--color-eau);" 
+      data-color="#00b0ff" 
+      title="Eau (Bleu)"
+      role="radio"
+      aria-checked="false"
+    ></button>
+    <button 
+      class="color-dot" 
+      style="background: var(--color-telecom);" 
+      data-color="#00e676" 
+      title="Télécom (Vert)"
+      role="radio"
+      aria-checked="false"
+    ></button>
+    <button 
+      class="color-dot" 
+      style="background: var(--color-fibre);" 
+      data-color="#e040fb" 
+      title="Fibre (Violet)"
+      role="radio"
+      aria-checked="false"
+    ></button>
+  </div>
+  
+  <!-- ===== BOTTOM DOCK ===== -->
+  <nav class="bottom-dock glass-card glass-card--elevated" aria-label="Outils">
+    <button id="btnPan" class="btn btn--icon-lg btn--active" title="Déplacer" aria-pressed="true">
+      <i class="fa-solid fa-hand"></i>
+    </button>
+    
+    <button id="btnHome" class="btn btn--icon-lg" title="Recentrer" aria-label="Recentrer la vue">
+      <i class="fa-solid fa-crosshairs"></i>
+    </button>
+    
+    <div class="dock-divider" role="separator"></div>
+    
+    <button id="btnZoomOut" class="btn btn--icon-lg" disabled title="Zoom -" aria-label="Dézoomer">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    
+    <button id="btnZoomIn" class="btn btn--icon-lg" disabled title="Zoom +" aria-label="Zoomer">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    
+    <div class="dock-divider" role="separator"></div>
+    
+    <button id="btnScale" class="btn btn--icon-lg btn--warning" disabled title="Étalonnage">
+      <i class="fa-solid fa-ruler"></i>
+    </button>
+    
+    <button id="btnMeasure" class="btn btn--icon-lg btn--success" disabled title="Mesurer">
+      <i class="fa-solid fa-pen-ruler"></i>
+    </button>
+    
+    <button id="btnAnnotation" class="btn btn--icon-lg btn--info" disabled title="Plan Minute (Cotation)">
+      <i class="fa-solid fa-pen-fancy"></i>
+    </button>
+    
+    <button id="btnText" class="btn btn--icon-lg btn--info" disabled title="Plan Minute (Texte)">
+      <i class="fa-solid fa-font"></i>
+    </button>
+    
+    <div class="dock-divider" role="separator"></div>
+    
+    <button id="btnUndo" class="btn btn--icon-lg btn--warning" disabled title="Annuler dernier" aria-label="Annuler">
+      <i class="fa-solid fa-rotate-left"></i>
+    </button>
+    
+    <button id="btnDelete" class="btn btn--icon-lg btn--danger" disabled title="Supprimer sélection" aria-label="Supprimer">
+      <i class="fa-solid fa-eraser"></i>
+    </button>
+  </nav>
+  
+  <!-- ===== TOUCH CURSOR ===== -->
+  <div id="touchCursor" class="touch-cursor" aria-hidden="true">
+    <div class="touch-cursor__ring"></div>
+    <div class="touch-cursor__cross-h"></div>
+    <div class="touch-cursor__cross-v"></div>
+    <div class="touch-cursor__dot"></div>
+  </div>
+  
+  <!-- ===== CONFIRM PAD (Touch) ===== -->
+  <div id="confirmPad" class="confirm-pad glass-card">
+    <button id="btnConfirmStart" class="btn btn--success confirm-btn">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Départ OK</span>
+    </button>
+    
+    <button id="btnConfirmEnd" class="btn btn--primary confirm-btn" disabled>
+      <i class="fa-solid fa-flag-checkered"></i>
+      <span>Arrivée OK</span>
+    </button>
+    
+    <button id="btnConfirmCancel" class="btn btn--danger confirm-btn" aria-label="Annuler">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  
+  <!-- ===== MODAL (Saisie mètres / texte) ===== -->
+  <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 class="modal__title" id="modalTitle">Distance en mètres</h2>
+      
+      <div class="modal__input-group">
+        <label for="modalInput" class="modal__label" id="modalLabel">Entrez la distance réelle</label>
+        <input 
+          type="number" 
+          id="modalInput" 
+          class="modal__input" 
+          step="0.01" 
+          min="0.01" 
+          placeholder="1.00"
+          inputmode="decimal"
+        >
+        <p class="modal__hint">Exemple : 1.50 pour 1m50</p>
+      </div>
+      
+      <div class="modal__actions">
+        <button id="modalCancel" class="btn btn--danger">Annuler</button>
+        <button id="modalConfirm" class="btn btn--primary">Valider</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ===== CANVAS AREA ===== -->
+  <div class="canvas-frame" aria-hidden="true"></div>
+  <main id="canvasWrapper" class="canvas-wrapper">
+    <canvas id="mainCanvas"></canvas>
+  </main>
+  
+  <!-- ===== VERSION LABEL ===== -->
+  <div class="version-label" id="versionLabel">v3.3.0</div>
+  
+  <!-- ===== APP SCRIPTS ===== -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/ocr.js"></script>
+  <script src="js/measure.js"></script>
+  <script src="js/annotation.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/touch.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
